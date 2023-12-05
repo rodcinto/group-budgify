@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
-import { john } from '../src/users/personas';
+import { john, paul, carla } from '../src/users/personas';
 
 describe('Use Cases', () => {
   // eslint-disable-next-line prettier/prettier
@@ -60,6 +60,32 @@ describe('Use Cases', () => {
       expect(response.body).toHaveProperty('accessToken');
 
       johnsAccessToken = response.body.accessToken;
+    });
+  });
+
+  describe(`After having their accounts created, Paul checks Carla's profile.`, () => {
+    let paulsAccessToken: string;
+
+    it('Paul logs in', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: paul.email,
+          password: paul.password,
+        })
+        .expect(201);
+
+      expect(response.body).toHaveProperty('accessToken');
+
+      paulsAccessToken = response.body.accessToken;
+    });
+    it(`Paul checks Carla's profile`, async () => {
+      const response = await request(app.getHttpServer())
+        .get('/users/3')
+        .set('Authorization', `Bearer ${paulsAccessToken}`)
+        .expect(200);
+
+      expect(response.body.email).toEqual(carla.email);
     });
   });
 
