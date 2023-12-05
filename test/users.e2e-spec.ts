@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { UsersModule } from '../src/users/users.module';
 import { UsersService } from '../src/users/users.service';
 import { john, paul, carla } from '../src/users/personas';
+import { JwtGuard } from '../src/auth/guards/jwt-auth.guard';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -22,6 +23,8 @@ describe('UsersController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [UsersModule],
     })
+      .overrideGuard(JwtGuard)
+      .useValue({ canActivate: () => true })
       .overrideProvider(UsersService)
       .useValue(fakeUsersService)
       .compile();

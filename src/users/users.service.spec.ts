@@ -3,22 +3,19 @@ import { PrismaClient } from '@prisma/client';
 import { UsersService } from './users.service';
 import { DatabaseService } from '../database/database.service';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
+import { john, paul } from './personas';
 
 describe('UsersService', () => {
   let usersService: UsersService;
   let prismaMock: DeepMockProxy<PrismaClient>;
 
-  const johnSmith = {
+  const decoratedJohn = {
     id: 1,
-    first_name: 'John',
-    last_name: 'Smith',
-    email: 'john.smith@budgify.io',
+    ...john,
   };
-  const paulPeterson = {
+  const decoratedPaul = {
     id: 2,
-    first_name: 'Paul',
-    last_name: 'Peterson',
-    email: 'paul.peterson@budgify.io',
+    ...paul,
   };
 
   beforeEach(async () => {
@@ -38,13 +35,13 @@ describe('UsersService', () => {
   });
 
   test('should create new user John Smith ', async () => {
-    prismaMock.user.create.mockResolvedValue(johnSmith);
-    await expect(usersService.create(johnSmith)).resolves.toEqual(johnSmith);
+    prismaMock.user.create.mockResolvedValue(decoratedJohn);
+    expect(decoratedJohn).toMatchObject(await usersService.create(john));
   });
 
   test('should update user John Smith last name', async () => {
     const updatedUser = {
-      ...johnSmith,
+      ...decoratedJohn,
       last_name: 'Smith Jr.',
     };
 
@@ -55,12 +52,12 @@ describe('UsersService', () => {
   });
 
   test('should find many users', async () => {
-    prismaMock.user.findMany.mockResolvedValue([johnSmith, paulPeterson]);
+    prismaMock.user.findMany.mockResolvedValue([decoratedJohn, decoratedPaul]);
     await expect(usersService.findAll()).resolves.toHaveLength(2);
   });
 
   test('should find one user called Paul with id 2', async () => {
-    prismaMock.user.findUnique.mockResolvedValue(paulPeterson);
-    await expect(usersService.findOne(2)).resolves.toEqual(paulPeterson);
+    prismaMock.user.findUnique.mockResolvedValue(decoratedPaul);
+    await expect(usersService.findOne(2)).resolves.toEqual(decoratedPaul);
   });
 });
