@@ -21,8 +21,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "pnpm dotenv:test --  jest --config ./test/jest-e2e.json",
+    "test:e2e:usecases": "pnpm dotenv:test --  jest test/use-cases.e2e-spec.ts --config ./test/jest-e2e.json --runInBand",
     "migrate:db:dev": "pnpm dotenv:dev -- pnpm prisma migrate dev --skip-seed",
-    "migrate:db:test": "pnpm dotenv:test -- pnpm prisma migrate deploy && pnpm run seed:test",
+    "migrate:db:test": "pnpm dotenv:test -- pnpm prisma migrate reset -- pnpm prisma migrate deploy -- pnpm run seed:test",
     "seed:dev": "pnpm dotenv:dev -- npx prisma db seed",
     "seed:test": "pnpm dotenv:test -- npx prisma db seed"
   },
