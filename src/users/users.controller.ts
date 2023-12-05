@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Prisma } from '@prisma/client';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
+import { PasswordPipe } from '../auth/password-pipe/password.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -34,6 +36,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtGuard)
+  @UsePipes(new PasswordPipe())
   @Patch(':id')
   update(
     @Param('id') id: string,
