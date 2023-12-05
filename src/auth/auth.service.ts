@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { BcryptDecorator } from './crypt/bcrypt.decorator';
+
+type SafeUser = Omit<User, 'password'>;
 
 @Injectable()
 export class AuthService {
@@ -11,14 +13,21 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async verifyAuthentication(username: string, password: string) {
+  async verifyAuthentication(
+    username: string,
+    password: string,
+  ): Promise<SafeUser | null> {
     const user = await this.usersService.findOneByEmail(username);
-    if (user && (await bcrypt.compare(password, user.password))) {
+
+    if (user === null) return null;
+
+    if (await BcryptDecorator.compare(password, user.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
 
       return result;
     }
+
     return null;
   }
 
