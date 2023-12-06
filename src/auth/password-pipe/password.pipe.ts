@@ -1,6 +1,6 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { BcryptDecorator } from '../crypt/bcrypt.decorator';
+import { Encryption } from '../crypt/encryption';
 
 type PrismaUserInput = Prisma.UserCreateInput | Prisma.UserUpdateInput;
 
@@ -16,7 +16,7 @@ export class PasswordPipe implements PipeTransform {
 
     let userModifiedInput: PrismaUserInput = userGivenInput;
 
-    const hashPassword = await BcryptDecorator.hash(
+    const hashPassword = await Encryption.hash(
       userGivenInput.password as string,
     );
     userModifiedInput = {
