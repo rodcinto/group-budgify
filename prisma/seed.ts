@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { BcryptDecorator } from '../src/auth/crypt/bcrypt.decorator';
+import { Encryption } from '../src/auth/crypt/encryption';
 import { john, paul, carla } from '../src/users/personas';
 
 const prisma = new PrismaClient();
@@ -8,17 +8,17 @@ async function main(): Promise<void> {
   const johnPrisma = await prisma.user.upsert({
     where: { email: john.email },
     update: {},
-    create: { ...john, password: await BcryptDecorator.hash(john.password) },
+    create: { ...john, password: await Encryption.hash(john.password) },
   });
   const paulPrisma = await prisma.user.upsert({
     where: { email: paul.email },
     update: {},
-    create: { ...paul, password: await BcryptDecorator.hash(paul.password) },
+    create: { ...paul, password: await Encryption.hash(paul.password) },
   });
   const carlaPrisma = await prisma.user.upsert({
     where: { email: carla.email },
     update: {},
-    create: { ...carla, password: await BcryptDecorator.hash(carla.password) },
+    create: { ...carla, password: await Encryption.hash(carla.password) },
   });
   console.log({ johnPrisma, paulPrisma, carlaPrisma });
 }
