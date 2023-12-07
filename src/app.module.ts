@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { configuration } from '../config/configuration';
 import { AuthModule } from './auth/auth.module';
-
+import { BudgetModule } from './budget/budget.module';
 @Module({
   imports: [
     AuthModule,
@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: `${process.cwd()}/config/env/${process.env.NODE_ENV}.env`,
       load: [configuration],
     }),
+    BudgetModule,
   ],
   controllers: [AppController],
   providers: [AppService],
