@@ -58,6 +58,13 @@ export class BudgetController {
     return this.budgetService.remove(+id, userId);
   }
 
+  @UseGuards(JwtGuard)
+  @Post('generate-invitation')
+  invitationKeyFor(@Request() req: any, @Body() data) {
+    const userId = this.extractUserIdFromReq(req);
+    return this.budgetService.generateInvitationKeyFor(data.budget_id, userId);
+  }
+
   private extractUserIdFromReq(req: any): number {
     return req.user.user.user_id;
   }

@@ -2,13 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
+import { EncryptionHelper } from './crypt/encryption.helper';
 
 @Injectable()
 export class BudgetService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly encryptionHelper: EncryptionHelper,
+  ) {}
 
   async create(userId: number, createBudgetDto: CreateBudgetDto) {
-    return await this.databaseService.budget.create({
+    const createdBudget = await this.databaseService.budget.create({
       data: {
         ...createBudgetDto,
         owner: {
@@ -18,6 +22,13 @@ export class BudgetService {
         },
       },
     });
+
+    return {
+      ...createdBudget,
+      invitation_key: await this.encryptionHelper.encrypt(
+        createdBudget.id.toString(),
+      ),
+    };
   }
 
   findAll(owner_id: number) {
@@ -54,5 +65,26 @@ export class BudgetService {
         owner_id,
       },
     });
+  }
+
+  async generateInvitationKeyFor(
+    id: number,
+    owner_id: number,
+  ): Promise<string> {
+    const budget = await this.databaseService.budget.findUnique({
+      where: {
+        id,
+        owner_id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (budget === null) {
+      return Promise.resolve('');
+    }
+
+    return this.encryptionHelper.encrypt(id.toString());
   }
 }
