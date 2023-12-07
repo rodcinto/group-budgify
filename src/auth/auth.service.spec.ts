@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { john } from '../users/personas';
 import { UsersService } from '../users/users.service';
-import { Encryption } from './crypt/encryption';
+import { HashHelper } from './crypt/hash.helper';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -29,7 +29,7 @@ describe('AuthService', () => {
     decoratedJohn = {
       id: 1,
       ...john,
-      password: await Encryption.hash(john.password),
+      password: await HashHelper.hash(john.password),
     };
   });
 
