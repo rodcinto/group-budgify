@@ -87,4 +87,45 @@ export class BudgetService {
 
     return this.encryptionHelper.encrypt(id.toString());
   }
+
+  async joinBudget(budgetKey: string, userId: number): Promise<void> {
+    const ERROR_MESSAGE = 'Could not join Budget';
+
+    const budgetId = await this.encryptionHelper.decrypt(budgetKey);
+
+    try {
+      const budget = await this.databaseService.budget.findUniqueOrThrow({
+        where: {
+          id: Number(budgetId),
+        },
+      });
+
+      if (budget.owner_id === userId) {
+        return Promise.resolve();
+      }
+    } catch (error) {
+      throw new Error(ERROR_MESSAGE);
+    }
+
+    const membership = await this.databaseService.budgetMembership.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        budget: {
+          connect: {
+            id: Number(budgetId),
+          },
+        },
+      },
+    });
+
+    if (membership.id > 0) {
+      return Promise.resolve();
+    }
+
+    throw new Error(ERROR_MESSAGE);
+  }
 }

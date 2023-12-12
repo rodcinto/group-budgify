@@ -36,4 +36,5 @@ model BudgetMembership {
   user User @relation(fields: [user_id], references: [id])
   budget_id Int
   budget Budget @relation(fields: [budget_id], references: [id])
+  @@unique([user_id, budget_id])
 }

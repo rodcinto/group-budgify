@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { BudgetService } from './budget.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
@@ -60,9 +61,17 @@ export class BudgetController {
 
   @UseGuards(JwtGuard)
   @Post('generate-invitation')
-  invitationKeyFor(@Request() req: any, @Body() data) {
+  invitationKeyFor(@Request() req: any, @Body() data: any) {
     const userId = this.extractUserIdFromReq(req);
     return this.budgetService.generateInvitationKeyFor(data.budget_id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('join')
+  @HttpCode(201)
+  joinBudget(@Request() req: any, @Body() data: any) {
+    const userId = this.extractUserIdFromReq(req);
+    return this.budgetService.joinBudget(data.key, userId);
   }
 
   private extractUserIdFromReq(req: any): number {
