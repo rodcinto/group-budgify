@@ -45,6 +45,9 @@ export class BudgetService {
         id,
         owner_id,
       },
+      include: {
+        categories: true,
+      },
     });
   }
 
