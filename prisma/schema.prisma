@@ -28,6 +28,7 @@ model Budget {
   owner_id Int
   owner User @relation(fields: [owner_id], references: [id])
   members BudgetMembership[]
+  categories BudgetCategory[]
 }
 
 model BudgetMembership {
@@ -37,4 +38,13 @@ model BudgetMembership {
   budget_id Int
   budget Budget @relation(fields: [budget_id], references: [id])
   @@unique([user_id, budget_id])
+}
+
+model BudgetCategory {
+  id Int @default(autoincrement()) @id
+  label String
+  description String?
+  budget_id Int
+  budget Budget @relation(fields: [budget_id], references: [id])
+  @@unique([label, budget_id])
 }
