@@ -11,40 +11,42 @@ datasource db {
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
+  id          Int     @default(autoincrement()) @id
+  email       String  @unique
   first_name  String
-  last_name  String
-  password String
-  budgets Budget[]
+  last_name   String
+  password    String
+  budgets     Budget[]
   memberships BudgetMembership[]
 }
 
 model Budget {
-  id Int @default(autoincrement()) @id
-  title String
-  start_date DateTime
-  end_date DateTime
-  owner_id Int
-  owner User @relation(fields: [owner_id], references: [id])
-  members BudgetMembership[]
-  categories BudgetCategory[]
+  id          Int       @default(autoincrement()) @id
+  title       String
+  start_date  DateTime
+  end_date    DateTime
+  owner_id    Int
+  owner       User      @relation(fields: [owner_id], references: [id])
+  members     BudgetMembership[]
+  categories  BudgetCategory[]
 }
 
 model BudgetMembership {
-  id Int @default(autoincrement()) @id
-  user_id Int
-  user User @relation(fields: [user_id], references: [id])
+  id        Int     @default(autoincrement()) @id
+  user_id   Int
   budget_id Int
-  budget Budget @relation(fields: [budget_id], references: [id])
+  user      User    @relation(fields: [user_id], references: [id])
+  budget    Budget  @relation(fields: [budget_id], references: [id])
+
   @@unique([user_id, budget_id])
 }
 
 model BudgetCategory {
-  id Int @default(autoincrement()) @id
-  label String
+  id          Int @default(autoincrement()) @id
+  label       String
   description String?
-  budget_id Int
-  budget Budget @relation(fields: [budget_id], references: [id])
+  budget_id   Int
+  budget      Budget @relation(fields: [budget_id], references: [id])
+
   @@unique([label, budget_id])
 }
