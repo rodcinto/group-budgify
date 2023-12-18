@@ -14,10 +14,14 @@ import { BudgetService } from './budget.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
+import { TransactionsService } from 'src/transactions/transactions.service';
 
 @Controller('budget')
 export class BudgetController {
-  constructor(private readonly budgetService: BudgetService) {}
+  constructor(
+    private readonly budgetService: BudgetService,
+    private readonly transactionsService: TransactionsService,
+  ) {}
 
   @UseGuards(JwtGuard)
   @Post()
@@ -72,6 +76,43 @@ export class BudgetController {
   joinBudget(@Request() req: any, @Body() data: any) {
     const userId = this.extractUserIdFromReq(req);
     return this.budgetService.joinBudget(data.key, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post(':id/add-money')
+  @HttpCode(201)
+  addToBudget(@Request() req: any, @Param('id') id: string, @Body() data: any) {
+    const userId = this.extractUserIdFromReq(req);
+
+    return this.transactionsService.add(
+      Number(id),
+      Number(userId),
+      data.amount,
+      data.description,
+      data.category_id,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Post(':id/take-money')
+  @HttpCode(201)
+  takeFromBudget(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() data: any,
+  ) {
+    const userId = this.extractUserIdFromReq(req);
+
+    // It should be only possibe to take money if the balance is positive,
+    // unless the user is the owner.
+    // But I think I can break this logic in two parts.
+    return this.transactionsService.subtract(
+      Number(id),
+      Number(userId),
+      data.amount,
+      data.description,
+      data.category_id,
+    );
   }
 
   private extractUserIdFromReq(req: any): number {
