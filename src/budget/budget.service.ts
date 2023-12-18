@@ -39,7 +39,7 @@ export class BudgetService {
     });
   }
 
-  findOne(id: number, owner_id: number) {
+  findOneOwned(id: number, owner_id: number) {
     return this.databaseService.budget.findUnique({
       where: {
         id,
@@ -47,6 +47,15 @@ export class BudgetService {
       },
       include: {
         categories: true,
+      },
+    });
+  }
+
+  findOneMembership(id: number, user_id: number) {
+    return this.databaseService.budgetMembership.findUnique({
+      where: {
+        id,
+        user_id,
       },
     });
   }

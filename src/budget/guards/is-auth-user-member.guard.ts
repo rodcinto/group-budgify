@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { BudgetService } from '../budget.service';
 
 @Injectable()
-export class IsOwnedByAuthUserGuard implements CanActivate {
+export class IsAuthUserMemberGuard implements CanActivate {
   constructor(private readonly budgetService: BudgetService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -10,8 +10,13 @@ export class IsOwnedByAuthUserGuard implements CanActivate {
     const userId = Number(request.user.user.user_id);
     const budgetId = Number(request.params.budgetId);
 
-    const budget = await this.budgetService.findOneOwned(budgetId, userId);
+    const ownership = await this.budgetService.findOneOwned(budgetId, userId);
 
-    return budget !== null;
+    const membership = await this.budgetService.findOneMembership(
+      budgetId,
+      userId,
+    );
+
+    return ownership !== null || membership !== null;
   }
 }

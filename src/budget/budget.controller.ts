@@ -15,6 +15,7 @@ import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
 import { TransactionsService } from '../transactions/transactions.service';
+import { IsAuthUserMemberGuard } from './guards/is-auth-user-member.guard';
 
 @Controller('budget')
 export class BudgetController {
@@ -42,7 +43,7 @@ export class BudgetController {
   @Get(':id')
   findOne(@Request() req: any, @Param('id') id: string) {
     const userId = this.extractUserIdFromReq(req);
-    return this.budgetService.findOne(+id, userId);
+    return this.budgetService.findOneOwned(+id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -113,6 +114,12 @@ export class BudgetController {
       data.description,
       data.category_id,
     );
+  }
+
+  @UseGuards(JwtGuard, IsAuthUserMemberGuard)
+  @Get(':budgetId/balance')
+  balance(@Param('budgetId') budgetId: string) {
+    return this.transactionsService.retrieveBalanceReport(Number(budgetId));
   }
 
   private extractUserIdFromReq(req: any): number {

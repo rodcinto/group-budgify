@@ -45,4 +45,25 @@ export class TransactionsService {
     transaction.setAmount(amount);
     return transaction.conclude();
   }
+
+  async retrieveBalanceReport(budgetId: number) {
+    const budgetTransactions =
+      await this.databaseService.transactionTrail.findMany({
+        where: {
+          budget_id: budgetId,
+        },
+      });
+
+    let finalBalance = 0;
+
+    if (budgetTransactions) {
+      finalBalance = budgetTransactions.reduce(
+        (currentBalance, transaction) => {
+          return currentBalance + Number(transaction.amount);
+        },
+        0,
+      );
+    }
+    return { balance: finalBalance, transactions: { ...budgetTransactions } };
+  }
 }
