@@ -12,7 +12,12 @@ describe('Use Cases', () => {
   let app: INestApplication;
 
   let johnsAccessToken: string;
-  let johnsID: number;
+  let paulsAccessToken: string;
+  let carlasAccessToken: string;
+
+  let johnsId: number;
+
+  let budgetId: number;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,12 +41,12 @@ describe('Use Cases', () => {
       expect(response.body).toHaveProperty('accessToken');
 
       johnsAccessToken = response.body.accessToken;
-      johnsID = response.body.id;
+      johnsId = response.body.id;
     });
 
     it('John updates his password', async () => {
       await request(app.getHttpServer())
-        .patch(`/users/${johnsID}`)
+        .patch(`/users/${johnsId}`)
         .set('Authorization', `Bearer ${johnsAccessToken}`)
         .send({
           password: NEW_PASSWORD,
@@ -98,10 +103,6 @@ describe('Use Cases', () => {
 
     const currentDateISOString: string = currentDate.toISOString();
     const futureDateISOString: string = futureDate.toISOString();
-
-    let johnsAccessToken: string;
-    let paulsAccessToken: string;
-    let carlasAccessToken: string;
 
     let invitationKey: string;
 
@@ -164,6 +165,7 @@ describe('Use Cases', () => {
         .expect(201);
 
       invitationKey = response.body.invitation_key;
+      budgetId = Number(response.body.id);
 
       expect(invitationKey.length).toBeGreaterThan(0);
     });
@@ -183,6 +185,53 @@ describe('Use Cases', () => {
         .set('Authorization', `Bearer ${carlasAccessToken}`)
         .send({
           key: invitationKey,
+        })
+        .expect(201);
+    });
+  });
+
+  describe('John, Paul, and Carla add their initial contribution to the Budget, increasing its Balance.', () => {
+    it('John contributes to Euro Tour.', async () => {
+      await request(app.getHttpServer())
+        .post(`/budget/${budgetId}/add-money`)
+        .set('Authorization', `Bearer ${johnsAccessToken}`)
+        .send({
+          amount: 1000,
+        })
+        .expect(201);
+    });
+
+    it('Paul contributes to Euro Tour.', async () => {
+      await request(app.getHttpServer())
+        .post(`/budget/${budgetId}/add-money`)
+        .set('Authorization', `Bearer ${paulsAccessToken}`)
+        .send({
+          amount: 900,
+        })
+        .expect(201);
+    });
+
+    it('Carla contributes to Euro Tour.', async () => {
+      await request(app.getHttpServer())
+        .post(`/budget/${budgetId}/add-money`)
+        .set('Authorization', `Bearer ${carlasAccessToken}`)
+        .send({
+          amount: 1200,
+        })
+        .expect(201);
+    });
+  });
+
+  describe('Paul surprises the group with a Wine Tasting in Venice.', () => {
+    it('Paul takes money from Euro Tour.', async () => {
+      await request(app.getHttpServer())
+        .post(`/budget/${budgetId}/take-money`)
+        .set('Authorization', `Bearer ${paulsAccessToken}`)
+        .send({
+          amount: 50,
+          description:
+            'Hey guys, I thought you might like some wine tasting in Venice! Paul.',
+          category_id: 4,
         })
         .expect(201);
     });
