@@ -14,7 +14,7 @@ import { BudgetService } from './budget.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
-import { TransactionsService } from 'src/transactions/transactions.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Controller('budget')
 export class BudgetController {
