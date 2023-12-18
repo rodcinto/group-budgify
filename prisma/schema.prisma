@@ -11,24 +11,26 @@ datasource db {
 }
 
 model User {
-  id          Int     @default(autoincrement()) @id
-  email       String  @unique
-  first_name  String
-  last_name   String
-  password    String
-  budgets     Budget[]
-  memberships BudgetMembership[]
+  id            Int     @default(autoincrement()) @id
+  email         String  @unique
+  first_name    String
+  last_name     String
+  password      String
+  budgets       Budget[]
+  memberships   BudgetMembership[]
+  transactions  TransactionTrail[]
 }
 
 model Budget {
-  id          Int       @default(autoincrement()) @id
-  title       String
-  start_date  DateTime
-  end_date    DateTime
-  owner_id    Int
-  owner       User      @relation(fields: [owner_id], references: [id])
-  members     BudgetMembership[]
-  categories  BudgetCategory[]
+  id            Int       @default(autoincrement()) @id
+  title         String
+  start_date    DateTime
+  end_date      DateTime
+  owner_id      Int
+  owner         User      @relation(fields: [owner_id], references: [id])
+  members       BudgetMembership[]
+  categories    BudgetCategory[]
+  transactions  TransactionTrail[]
 }
 
 model BudgetMembership {
@@ -47,6 +49,21 @@ model BudgetCategory {
   description String?
   budget_id   Int
   budget      Budget @relation(fields: [budget_id], references: [id])
+  transactions TransactionTrail[]
 
   @@unique([label, budget_id])
+}
+
+model TransactionTrail {
+  id            Int @default(autoincrement()) @id
+  amount        Decimal @db.Decimal(9, 2)
+  details       String? //Change this field to "details"
+  moment        DateTime
+  budget_id     Int
+  user_id       Int
+  user          User @relation(fields: [user_id], references: [id])
+  budget        Budget @relation(fields: [budget_id], references: [id])
+
+  category_id   Int?
+  category      BudgetCategory? @relation(fields: [category_id], references: [id])
 }
