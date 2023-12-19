@@ -9,6 +9,15 @@ export class NegativeTransaction extends TransactionTrail {
       );
     }
 
+    const absoluteValue = this.transformIntoAbsolute(value);
+    const futureBudgetBalance = this.budget.getBalance() - absoluteValue;
+
+    if (futureBudgetBalance < 0 && this.user.constructor.name !== 'Owner') {
+      throw Error(
+        'You can not take more money than you have, unless you own the Budget.',
+      );
+    }
+
     this.amount -= this.transformIntoAbsolute(value);
   }
 }

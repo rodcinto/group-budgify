@@ -16,12 +16,16 @@ import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
 import { TransactionsService } from '../transactions/transactions.service';
 import { IsAuthUserMemberGuard } from './guards/is-auth-user-member.guard';
+import { BudgetFacadeFactory } from '../transactions/factory/budget-facade.factory';
+import { UserFacadeFactory } from '../transactions/factory/user-facade.factory';
 
 @Controller('budget')
 export class BudgetController {
   constructor(
     private readonly budgetService: BudgetService,
     private readonly transactionsService: TransactionsService,
+    private readonly budgetFacadeFactory: BudgetFacadeFactory,
+    private readonly userFacadeFactory: UserFacadeFactory,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -82,12 +86,23 @@ export class BudgetController {
   @UseGuards(JwtGuard)
   @Post(':id/add-money')
   @HttpCode(201)
-  addToBudget(@Request() req: any, @Param('id') id: string, @Body() data: any) {
+  async addToBudget(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() data: any,
+  ) {
     const userId = this.extractUserIdFromReq(req);
+    const budgetFacade = await this.budgetFacadeFactory.buildBudgetFacade(
+      this.budgetService.findOneById(Number(id)),
+    );
+    const userFacade = this.userFacadeFactory.buildUserFacade(
+      userId,
+      budgetFacade,
+    );
 
     return this.transactionsService.add(
-      Number(id),
-      Number(userId),
+      budgetFacade,
+      userFacade,
       data.amount,
       data.description,
       data.category_id,
@@ -97,19 +112,26 @@ export class BudgetController {
   @UseGuards(JwtGuard)
   @Post(':id/take-money')
   @HttpCode(201)
-  takeFromBudget(
+  async takeFromBudget(
     @Request() req: any,
     @Param('id') id: string,
     @Body() data: any,
   ) {
     const userId = this.extractUserIdFromReq(req);
+    const budgetFacade = await this.budgetFacadeFactory.buildBudgetFacade(
+      await this.budgetService.findOneById(Number(id)),
+    );
+    const userFacade = this.userFacadeFactory.buildUserFacade(
+      userId,
+      budgetFacade,
+    );
 
     // It should be only possibe to take money if the balance is positive,
     // unless the user is the owner.
     // But I think I can break this logic in two parts.
     return this.transactionsService.subtract(
-      Number(id),
-      Number(userId),
+      budgetFacade,
+      userFacade,
       data.amount,
       data.description,
       data.category_id,
@@ -119,7 +141,7 @@ export class BudgetController {
   @UseGuards(JwtGuard, IsAuthUserMemberGuard)
   @Get(':budgetId/balance')
   balance(@Param('budgetId') budgetId: string) {
-    return this.transactionsService.retrieveBalanceReport(Number(budgetId));
+    return this.transactionsService.createBalanceReport(Number(budgetId));
   }
 
   private extractUserIdFromReq(req: any): number {

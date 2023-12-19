@@ -1,17 +1,19 @@
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from '../../database/database.service';
-import { Budget } from './budget';
+import { BudgetFacade } from './budget.facade';
 import { Category } from './category';
-import { User } from './user';
+import { Owner } from './owner';
+import { Member } from './member';
 
+type UserType = Member | Owner;
 export abstract class TransactionTrail {
   protected amount: number = 0;
   protected moment: Date;
 
   constructor(
     private readonly databaseService: DatabaseService,
-    protected user: User,
-    protected budget: Budget,
+    protected user: UserType,
+    protected budget: BudgetFacade,
     protected details?: string,
     protected category?: Category,
     protected id?: number,

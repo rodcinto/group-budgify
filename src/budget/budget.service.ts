@@ -51,6 +51,14 @@ export class BudgetService {
     });
   }
 
+  findOneById(id: number) {
+    return this.databaseService.budget.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
+  }
+
   findOneMembership(id: number, user_id: number) {
     return this.databaseService.budgetMembership.findUnique({
       where: {

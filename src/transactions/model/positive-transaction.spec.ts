@@ -3,23 +3,23 @@ import { mockDeep } from 'jest-mock-extended';
 import { PositiveTransaction } from './positive-transaction';
 import { TransactionTrail } from './transaction-trail';
 import { DatabaseService } from '../../database/database.service';
-import { Budget } from './budget';
+import { BudgetFacade } from './budget.facade';
 
 describe('PositiveTransaction', () => {
   let positiveTransaction: PositiveTransaction;
-  let budgetMock: Budget;
+  let budgetMock: BudgetFacade;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PositiveTransaction,
         { provide: DatabaseService, useValue: mockDeep<DatabaseService>() },
-        Budget,
+        BudgetFacade,
       ],
     }).compile();
 
     positiveTransaction = module.get<PositiveTransaction>(PositiveTransaction);
-    budgetMock = module.get<Budget>(Budget);
+    budgetMock = module.get<BudgetFacade>(BudgetFacade);
   });
 
   it('should be defined', () => {
