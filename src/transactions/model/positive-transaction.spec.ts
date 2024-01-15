@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { mockDeep } from 'jest-mock-extended';
 import { PositiveTransaction } from './positive-transaction';
 import { TransactionTrail } from './transaction-trail';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from 'common/database';
 import { BudgetFacade } from './budget.facade';
 
 describe('PositiveTransaction', () => {

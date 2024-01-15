@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { EncryptionHelper } from './crypt/encryption.helper';
+import { DatabaseService } from 'common/database';
 
 @Injectable()
 export class BudgetService {

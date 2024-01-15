@@ -9,23 +9,21 @@ import {
   UseGuards,
   Request,
   HttpCode,
+  Inject,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 import { BudgetService } from './budget.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtGuard } from '../auth/guards/jwt-auth.guard';
-import { TransactionsService } from '../transactions/transactions.service';
 import { IsAuthUserMemberGuard } from './guards/is-auth-user-member.guard';
-import { BudgetFacadeFactory } from '../transactions/factory/budget-facade.factory';
-import { UserFacadeFactory } from '../transactions/factory/user-facade.factory';
 
 @Controller('budget')
 export class BudgetController {
   constructor(
     private readonly budgetService: BudgetService,
-    private readonly transactionsService: TransactionsService,
-    private readonly budgetFacadeFactory: BudgetFacadeFactory,
-    private readonly userFacadeFactory: UserFacadeFactory,
+    @Inject('transaction') private readonly client: ClientProxy,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -83,65 +81,65 @@ export class BudgetController {
     return this.budgetService.joinBudget(data.key, userId);
   }
 
-  @UseGuards(JwtGuard)
-  @Post(':id/add-money')
+  @UseGuards(JwtGuard, IsAuthUserMemberGuard)
+  @Post(':budgetId/add-money')
   @HttpCode(201)
   async addToBudget(
     @Request() req: any,
-    @Param('id') id: string,
+    @Param('budgetId') budgetId: number,
     @Body() data: any,
-  ) {
-    const userId = this.extractUserIdFromReq(req);
-    const budgetFacade = await this.budgetFacadeFactory.buildBudgetFacade(
-      this.budgetService.findOneById(Number(id)),
-    );
-    const userFacade = this.userFacadeFactory.buildUserFacade(
-      userId,
-      budgetFacade,
-    );
+  ): Promise<Observable<object>> {
+    const user_id = this.extractUserIdFromReq(req);
 
-    return this.transactionsService.add(
-      budgetFacade,
-      userFacade,
-      data.amount,
-      data.description,
-      data.category_id,
-    );
+    const budget = await this.budgetService.findOneById(Number(budgetId));
+
+    const pattern = { cmd: 'add-money' };
+    const payload = {
+      user_id,
+      budget: {
+        id: budget.id,
+        owner_id: budget.owner_id,
+      },
+      amount: data.amount,
+      description: data.description,
+      category_id: data.category_id,
+    };
+
+    return this.client.send<object>(pattern, payload);
   }
 
-  @UseGuards(JwtGuard)
-  @Post(':id/take-money')
+  @UseGuards(JwtGuard, IsAuthUserMemberGuard)
+  @Post(':budgetId/take-money')
   @HttpCode(201)
   async takeFromBudget(
     @Request() req: any,
-    @Param('id') id: string,
+    @Param('budgetId') budgetId: string,
     @Body() data: any,
-  ) {
-    const userId = this.extractUserIdFromReq(req);
-    const budgetFacade = await this.budgetFacadeFactory.buildBudgetFacade(
-      await this.budgetService.findOneById(Number(id)),
-    );
-    const userFacade = this.userFacadeFactory.buildUserFacade(
-      userId,
-      budgetFacade,
-    );
+  ): Promise<Observable<object>> {
+    const user_id = this.extractUserIdFromReq(req);
 
-    // It should be only possibe to take money if the balance is positive,
-    // unless the user is the owner.
-    // But I think I can break this logic in two parts.
-    return this.transactionsService.subtract(
-      budgetFacade,
-      userFacade,
-      data.amount,
-      data.description,
-      data.category_id,
-    );
+    const budget = await this.budgetService.findOneById(Number(budgetId));
+
+    const pattern = { cmd: 'take-money' };
+    const payload = {
+      user_id,
+      budget: {
+        id: budget.id,
+        owner_id: budget.owner_id,
+      },
+      amount: data.amount,
+      description: data.description,
+      category_id: data.category_id,
+    };
+
+    return this.client.send<object>(pattern, payload);
   }
 
   @UseGuards(JwtGuard, IsAuthUserMemberGuard)
   @Get(':budgetId/balance')
-  balance(@Param('budgetId') budgetId: string) {
-    return this.transactionsService.createBalanceReport(Number(budgetId));
+  balance(@Param('budgetId') budgetId: string): Observable<object> {
+    const pattern = { cmd: 'balance-report' };
+    return this.client.send<object>(pattern, { budgetId });
   }
 
   private extractUserIdFromReq(req: any): number {

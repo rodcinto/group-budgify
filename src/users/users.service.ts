@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
-import { DatabaseService } from '../database/database.service';
+import { DatabaseService } from 'common/database';
 
 type SafeUser = Omit<User, 'password'>;
 

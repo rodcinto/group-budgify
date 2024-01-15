@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from 'common/database';
 import { BudgetFacade } from './budget.facade';
 import { Category } from './category';
 import { Owner } from './owner';

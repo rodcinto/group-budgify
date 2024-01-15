@@ -7,8 +7,14 @@ import { CategoriesService } from './categories/categories.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { BudgetFacadeFactory } from '../transactions/factory/budget-facade.factory';
 import { UserFacadeFactory } from '../transactions/factory/user-facade.factory';
+import { RmqModule } from 'common/rmq';
 
 @Module({
+  imports: [
+    RmqModule.register({
+      name: 'transaction',
+    }),
+  ],
   controllers: [BudgetController, CategoriesController],
   providers: [
     BudgetService,

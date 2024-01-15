@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PositiveTransaction } from './model/positive-transaction';
-import { DatabaseService } from '../database/database.service';
 import { Category } from './model/category';
 import { NegativeTransaction } from './model/negative-transaction';
 import { BudgetFacadeFactory } from './factory/budget-facade.factory';
 import { UserFacade } from './model/user.facade';
 import { BudgetFacade } from './model/budget.facade';
 import { TransactionTrail as TransactionTrailData } from '@prisma/client';
+import { DatabaseService } from 'common/database';
 
 @Injectable()
 export class TransactionsService {
