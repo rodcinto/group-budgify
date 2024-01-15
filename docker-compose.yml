@@ -5,9 +5,25 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    networks:
+      - group_budgify_network
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+    networks:
+      - group_budgify_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+      - group_budgify_network
+
+networks:
+  group_budgify_network:
+    driver: bridge
