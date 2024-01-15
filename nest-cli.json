@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/group-budgify/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true
+    "webpack": true,
+    "tsConfigPath": "apps/group-budgify/tsconfig.app.json"
   },
   "projects": {
     "common": {
@@ -33,6 +34,26 @@
       "compilerOptions": {
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
+    },
+    "group-budgify": {
+      "type": "application",
+      "root": "apps/group-budgify",
+      "entryFile": "main",
+      "sourceRoot": "apps/group-budgify/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/group-budgify/tsconfig.app.json"
+      }
+    },
+    "transactions-app": {
+      "type": "application",
+      "root": "apps/transactions-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/transactions-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/transactions-app/tsconfig.app.json"
+      }
     }
-  }
+  },
+  "monorepo": true,
+  "root": "apps/group-budgify"
 }
